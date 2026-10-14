@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AegisGuard | DRP Security Operations Center</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body class="dashboard-body">
+
+    <!-- AUDIO ALARM ACTIVE BANNER -->
+    <div id="alarmBanner" class="alarm-siren-bar hidden">
+        <div class="alarm-content">
+            <span class="alarm-icon-spin">🚨</span>
+            <span class="alarm-text" id="alarmBannerText">CRITICAL THREAT DETECTED: PERIMETER ALARM SOUNDING</span>
+            <button class="btn-mute-alarm" onclick="silenceAlarm()">Silence Alarm 🔕</button>
+        </div>
+    </div>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-box">🛡️</div>
+            <div class="sidebar-brand">
+                <h3>AegisGuard</h3>
+                <span class="sub-label">SOC Command • DRP 2.5</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" onclick="showSection('overview'); return false;">
+                <span class="nav-icon">📊</span>
+                <span>Security Overview</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('branddna'); return false;">
+                <span class="nav-icon">🧬</span>
+                <span>Brand DNA & Real Co.</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('multimodal'); return false;">
+                <span class="nav-icon">📸</span>
+                <span>Logo & Screenshot Scan</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('social'); return false;">
+                <span class="nav-icon">🔍</span>
+                <span>Social Media Scan</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('app'); return false;">
+                <span class="nav-icon">📱</span>
+                <span>Mobile App Guard</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('typosquat'); return false;">
+                <span class="nav-icon">🌐</span>
+                <span>Homoglyph & Domains</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('voice'); return false;">
+                <span class="nav-icon">🎙️</span>
+                <span>Voice Scam Auditor</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('scamgraph'); return false;">
+                <span class="nav-icon">🕸️</span>
+                <span>Scam Connection Graph</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('alerts'); return false;">
+                <span class="nav-icon">🚨</span>
+                <span>Live Threat Feed</span>
+                <span class="badge-count" id="threatCountBadge">{{ stats.total_scans }}</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('takedown'); return false;">
+                <span class="nav-icon">⚖️</span>
+                <span>1-Click Takedowns</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showSection('hub'); return false;">
+                <span class="nav-icon">💡</span>
+                <span>Knowledge Hub</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="system-health">
+                <span class="pulse-emerald"></span>
+                <span>Defense Engine: Online</span>
+            </div>
+            <a href="/" class="btn-exit">🚪 Exit to Portal</a>
+        </div>
+    </aside>
+
+    <!-- MAIN DASHBOARD CONTENT AREA -->
+    <main class="main-content">
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="topbar-title-group">
+                <h1>Digital Risk Protection SOC</h1>
+                <p>Autonomous Perimeter Threat Defense • Brand DNA & Fraud Detection</p>
+            </div>
+
+            <!-- Header Controls: Alarm Toggle, Language Toggle, Presets -->
+            <div class="topbar-actions-group">
+                <!-- Alarm Control -->
+                <button class="btn-pill alarm-toggle-btn active-alarm" id="btnToggleAlarm" onclick="toggleAlarmAudio()">
+                    <span id="alarmStatusIcon">🔔</span> <span id="alarmStatusText">Alarm: ON</span>
+                </button>
+                <button class="btn-pill" onclick="testAlarmSound()" title="Test synthesized siren sound">
+                    🔊 Test Alarm
+                </button>
+                <!-- Bilingual Telugu/English Toggle -->
+                <button class="btn-pill lang-btn" id="btnToggleLanguage" onclick="toggleBilingualMode()">
+                    🌐 <span id="currentLangLabel">English (EN)</span>
+                </button>
+            </div>
+
+            <!-- Quick Hackathon Demo Scenarios Strip -->
+            <div class="demo-preset-container" id="demo-bar">
+                <span class="preset-label">⚡ Hackathon Scenarios:</span>
+                <button class="preset-chip" onclick="loadDemoScenario('sbi_brand_dna')">Fake SBI Brand Phish</button>
+                <button class="preset-chip" onclick="loadDemoScenario('digital_arrest_voice')">🚨 Digital Arrest Voice Call</button>
+                <button class="preset-chip" onclick="loadDemoScenario('snapchat_bot')">Snapchat Impersonator</button>
+                <button class="preset-chip" onclick="loadDemoScenario('fake_bank_app')">Cloned Bank APK</button>
+                <button class="preset-chip" onclick="loadDemoScenario('homoglyph_phish')">Homoglyph Typosquat</button>
+                <button class="preset-chip" onclick="loadDemoScenario('verified_safe')">Verified Safe Profile</button>
+                <button class="preset-chip reset-btn" onclick="resetTelemetryData()">🔄 Reset Telemetry</button>
+            </div>
+        </header>
+
+        <!-- ============================================================== -->
+        <!-- SECTION 1: SECURITY OVERVIEW & STATISTICAL DASHBOARD -->
+        <!-- ============================================================== -->
+        <section id="overview" class="content-section">
+            <div class="section-title-bar">
+                <div>
+                    <h2>Executive Threat Intelligence Overview</h2>
+                    <p class="section-subtitle">Statistical distribution of flagged impersonation surfaces and forensic telemetry</p>
+                </div>
+                <button class="btn-action-primary" onclick="showSection('branddna')">
+                    + Run Brand DNA Audit
+                </button>
+            </div>
+
+            <!-- 4 KPI Metrics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-title">Total Monitored Assets</span>
+                        <span class="stat-icon-wrap bg-blue">🛡️</span>
+                    </div>
+                    <div class="stat-val" id="kpiTotal">{{ stats.total_scans }}</div>
+                    <div class="stat-trend trend-neutral">Audited across domains & stores</div>
+                </div>
+
+                <div class="stat-card border-critical">
+                    <div class="stat-card-header">
+                        <span class="stat-title">High & Critical Threats</span>
+                        <span class="stat-icon-wrap bg-red">🚨</span>
+                    </div>
+                    <div class="stat-val text-red" id="kpiHigh">{{ stats.high_and_critical_risk }}</div>
+                    <div class="stat-trend trend-negative">Alarm triggers & active takedowns</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-title">Impersonation Rate</span>
+                        <span class="stat-icon-wrap bg-amber">⚠️</span>
+                    </div>
+                    <div class="stat-val text-warning" id="kpiImpersonation">{{ stats.impersonation_rate }}</div>
+                    <div class="stat-trend trend-positive">Perimeter attack ratio</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-title">Takedown Action Rate</span>
+                        <span class="stat-icon-wrap bg-emerald">⚖️</span>
+                    </div>
+                    <div class="stat-val text-emerald" id="kpiTakedown">{{ stats.takedown_action_rate }}</div>
+                    <div class="stat-trend trend-positive">1-Click automated dispatches</div>
+                </div>
+            </div>
+
+            <!-- 4 Interactive Statistical Graphs Grid -->
+            <div class="charts-grid">
+                <!-- Chart 1: Threat Severity Doughnut -->
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <h3>Threat Severity Distribution</h3>
+                        <span class="info-tooltip" title="Ratio of flagged digital assets across standard cybersecurity severity tiers">ℹ️</span>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="severityDoughnutChart"></canvas>
+                    </div>
+                    <div class="chart-legend-row" id="doughnutLegend"></div>
+                </div>
+
+                <!-- Chart 2: Platform Attack Surface Bar Chart -->
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <h3>Attack Vectors by Platform</h3>
+                        <span class="info-tooltip" title="Volume of impersonation profiles categorized by host platform (Snapchat, Instagram, X, Google Play)">ℹ️</span>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="platformBarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 3: 7-Day Detection Trend Line Chart -->
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <h3>7-Day Threat Detection Velocity</h3>
+                        <span class="info-tooltip" title="Velocity of new malicious digital identities identified over past 7 cycles">ℹ️</span>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="trendLineChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 4: Multi-Vector Threat Surface Radar Chart -->
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <h3>Threat Surface Vector Radar</h3>
+                        <span class="info-tooltip" title="Multi-dimensional perimeter vulnerability assessment across core attack mechanisms">ℹ️</span>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="vectorRadarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Action Cards -->
+            <div class="module-quick-cards">
+                <div class="quick-card" onclick="showSection('branddna')">
+                    <div class="quick-icon">🧬</div>
+                    <div class="quick-info">
+                        <h4>Brand DNA & Real Co. Matcher</h4>
+                        <p>Audit fraud websites & handles mimicking SBI, HDFC, PayPal, Microsoft, Apple, or Snapchat.</p>
+                    </div>
+                    <span class="quick-arrow">→</span>
+                </div>
+                <div class="quick-card" onclick="showSection('multimodal')">
+                    <div class="quick-icon">📸</div>
+                    <div class="quick-info">
+                        <h4>Logo & Screenshot Scanner</h4>
+                        <p>Detect trademark logo misuse, fake payment QR codes, and urgent KYC coercion traps.</p>
+                    </div>
+                    <span class="quick-arrow">→</span>
+                </div>
+                <div class="quick-card" onclick="showSection('voice')">
+                    <div class="quick-icon">🎙️</div>
+                    <div class="quick-info">
+                        <h4>Live Voice Scam Auditor</h4>
+                        <p>Microphone voice recording & speech forensics for digital arrest, fake CBI, and OTP scams.</p>
+                    </div>
+                    <span class="quick-arrow">→</span>
+                </div>
+                <div class="quick-card" onclick="showSection('scamgraph')">
+                    <div class="quick-icon">🕸️</div>
+                    <div class="quick-info">
+                        <h4>Scam Connection Graph</h4>
+                        <p>Visualize syndicates linking suspect handles, rogue domains, fake APKs, and UPI IDs.</p>
+                    </div>
+                    <span class="quick-arrow">→</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- SECTION 2: BRAND DNA & REAL ENTERPRISE COMPANIES MATCHER -->
+        <!-- ============================================================== -->
+        <section id="branddna" class="content-section hidden">
+            <div class="section-title-bar">
+                <div>
+                    <h2>🧬 Brand DNA Matcher & Real Companies Fraud Detector</h2>
+                    <p class="section-subtitle">Cross-reference suspect digital profiles against authentic enterprise registries (SBI, PayPal, Microsoft, Apple, Snapchat)</p>
+                </div>
+            </div>
+
+            <div class="scanner-two-col">
+                <div class="panel-box">
+                    <form id="brandDnaForm">
+                        <div class="form-group">
+                            <label for="dnaRealBrand">Select Protected Real Enterprise Brand *</label>
+                            <select id="dnaRealBrand" required>
+                                <option value="state bank of india">State Bank of India (SBI) - Banking</option>
+                                <option value="hdfc bank">HDFC Bank - Banking</option>
+                                <option value="paypal">PayPal Inc. - Payments</option>
+                                <option value="snapchat">Snapchat / Snap Inc. - Social & AR</option>
+                                <option value="microsoft">Microsoft Corporation - Software</option>
+                                <option value="google">Google LLC - Search & Tech</option>
+                                <option value="apple">Apple Inc. - Consumer Tech</option>
+                                <option value="amazon">Amazon - E-Commerce</option>
+                                <option value="netflix">Netflix Inc. - Streaming</option>
+                                <option value="apex bank">Apex Bank - Wealth Management</option>
+                            </select>
+                            <span class="help-text">Select authentic corporation to compare against the suspect entity</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dnaSuspectDomain">Suspect Website / Domain to Audit *</label>
+                            <input type="text" id="dnaSuspectDomain" placeholder="e.g. sbi-kyc-update-portal.net or paypal-login.xyz" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group flex-1">
+                                <label for="dnaSuspectPlatform">Platform</label>
+                                <select id="dnaSuspectPlatform">
+                                    <option value="web">Web Domain</option>
+                                    <option value="snapchat">Snapchat</option>
+                                    <option value="instagram">Instagram</option>
+                                    <option value="twitter">X / Twitter</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="telegram">Telegram</option>
+                                </select>
+                            </div>
+                            <div class="form-group flex-1">
+                                <label for="dnaSuspectHandle">Suspect Handle / Account</label>
+                                <input type="text" id="dnaSuspectHandle" placeholder="e.g. sbi_support_urgent">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dnaSuspectEmail">Claimed Contact / Support Email</label>
+                            <input type="email" id="dnaSuspectEmail" placeholder="e.g. sbi.helpdesk2026@gmail.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dnaScreenshotInput">📸 Attach Suspect Portal / Ad Screenshot Evidence (Optional)</label>
+                            <input type="file" id="dnaScreenshotInput" accept="image/*" class="form-file-input" onchange="previewEvidenceFile(this, 'dnaFilePreview')">
+                            <div id="dnaFilePreview" class="file-preview-name text-mono hidden"></div>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="btnSubmitBrandDna">
+                            <span>🧬 Match Brand DNA & Detect Discrepancies</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Brand DNA Side-by-Side Results -->
+                <div class="panel-box results-box" id="brandDnaResultCard">
+                    <div class="placeholder-state" id="dnaPlaceholder">
+                        <div class="placeholder-icon">🧬</div>
+                        <h3>Awaiting Brand Parameters</h3>
+                        <p>Select a real corporation or trigger the <b>Fake SBI Brand Phish</b> preset above to run side-by-side DNA matching.</p>
+                    </div>
+
+                    <div class="analysis-results-content hidden" id="dnaResults">
+                        <div class="score-gauge-header">
+                            <div class="gauge-meter-wrapper">
+                                <svg class="gauge-svg" viewBox="0 0 120 120">
+                                    <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                                    <circle class="gauge-progress" id="dnaGaugeArc" cx="60" cy="60" r="50"></circle>
+                                </svg>
+                                <div class="gauge-center-text">
+                                    <span class="gauge-number" id="dnaScoreVal">0</span>
+                                    <span class="gauge-sub">/ 100</span>
+                                </div>
+                            </div>
+                            <div class="score-meta">
+                                <span class="badge-risk" id="dnaRiskBadge">Minimal</span>
+                                <h3 id="dnaResultTitle">Brand DNA Analysis</h3>
+                                <p id="dnaResultTarget" class="text-mono">Target</p>
+                            </div>
+                        </div>
+
+                        <!-- Side by Side Comparison Grid -->
+                        <div class="dna-compare-grid">
+                            <div class="dna-col authentic-dna">
+                                <h4>✅ Legitimate Brand DNA</h4>
+                                <ul id="dnaOfficialList"></ul>
+                            </div>
+                            <div class="dna-col suspect-dna">
+                                <h4>🚨 Suspect Deviations</h4>
+                                <ul id="dnaDiscrepanciesList"></ul>
+                            </div>
+                        </div>
+
+                        <!-- Bilingual Telugu/English Banner -->
+                        <div class="bilingual-explanation-box" id="dnaBilingualBox">
+                            <div class="lang-tag">తెలుగు వివరణ (Telugu Explanation)</div>
+                            <p id="dnaTeluguText" class="telugu-text">హెచ్చరిక...</p>
+                        </div>
+
+                        <div class="results-actions">
+                            <button class="btn-action-primary" id="btnDnaGenerateTakedown">
+                                ⚖️ Draft Brand Trademark Cease & Desist
+                            </button>
+                            <button class="btn-pill btn-screenshot-export" onclick="exportCardScreenshot('brandDnaResultCard', 'Brand DNA Threat Audit')">
+                                📸 Download Report Screenshot
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- SECTION 3: LOGO & MULTIMODAL SCREENSHOT SCANNER -->
+        <!-- ============================================================== -->
+        <section id="multimodal" class="content-section hidden">
+            <div class="section-title-bar">
+                <div>
+                    <h2>📸 Logo Detection & Screenshot Scam Scanner</h2>
+                    <p class="section-subtitle">Audit uploaded screenshots, fraudulent payment QR notices, and company trademark logo misuse</p>
+                </div>
+            </div>
+
+            <div class="scanner-two-col">
+                <div class="panel-box">
+                    <form id="multimodalForm">
+                        <div class="form-group">
+                            <label>Upload Screenshot / Photo / Logo Image</label>
+                            <div class="upload-dropzone" id="dropZone" onclick="document.getElementById('fileUploadInput').click()">
+                                <div class="drop-icon">📤</div>
+                                <p><b>Click to browse or drop screenshot</b></p>
+                                <span class="help-text">PNG, JPG, or WEBP up to 5MB</span>
+                                <input type="file" id="fileUploadInput" accept="image/*" class="hidden" onchange="handleFileUpload(event)">
+                            </div>
+                            <div id="fileUploadPreviewName" class="file-preview-name text-mono hidden"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="imgClaimedBrand">Target Protected Brand</label>
+                            <input type="text" id="imgClaimedBrand" placeholder="e.g. State Bank of India or PayPal">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="imgExtractedText">Visible Screenshot Text / Phishing Message</label>
+                            <textarea id="imgExtractedText" rows="3" placeholder="e.g. 'Dear customer, your SBI account KYC has expired. Transfer Rs. 10 to UPI id verify@okaxis immediately or account blocked.'"></textarea>
+                            <span class="help-text">Paste message text or let the forensic OCR parser extract keywords</span>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="btnSubmitMultimodal">
+                            <span>🔍 Audit Image & Detect Logo Misuse</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="panel-box results-box" id="multimodalResultCard">
+                    <div class="placeholder-state" id="multiPlaceholder">
+                        <div class="placeholder-icon">📸</div>
+                        <h3>Awaiting Image Forensics</h3>
+                        <p>Upload a screenshot on the left or click sample scam messages below to inspect logo cloning and payment fraud cues.</p>
+                    </div>
+
+                    <div class="analysis-results-content hidden" id="multiResults">
+                        <div class="score-gauge-header">
+                            <div class="gauge-meter-wrapper">
+                                <svg class="gauge-svg" viewBox="0 0 120 120">
+                                    <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                                    <circle class="gauge-progress" id="multiGaugeArc" cx="60" cy="60" r="50"></circle>
+                                </svg>
+                                <div class="gauge-center-text">
+                                    <span class="gauge-number" id="multiScoreVal">0</span>
+                                    <span class="gauge-sub">/ 100</span>
+                                </div>
+                            </div>
+                            <div class="score-meta">
+                                <span class="badge-risk" id="multiRiskBadge">High Risk</span>
+                                <h3>Multimodal Image Audit</h3>
+                                <p id="multiFilename" class="text-mono">screenshot.png</p>
+                            </div>
+                        </div>
+
+                        <div class="indicators-section">
+                            <h4>Detected Logos & Trademark Assets</h4>
+                            <ul class="indicators-list" id="multiLogosList"></ul>
+                        </div>
+
+                        <div class="indicators-section">
+                            <h4>Fraudulent Scam Vectors Flagged</h4>
+                            <ul class="indicators-list" id="multiVectorsList"></ul>
+                        </div>
+
+                        <!-- Bilingual Telugu/English Banner -->
+                        <div class="bilingual-explanation-box">
+                            <div class="lang-tag">తెలుగు వివరణ (Telugu Guidance)</div>
+                            <p id="multiTeluguText" class="telugu-text">హెచ్చరిక...</p>
+                        </div>
+
+                        <div class="results-actions">
+                            <button class="btn-action-primary" id="btnMultiGenerateTakedown">
+                                ⚖️ Draft Intellectual Property Notice
+                            </button>
+                            <button class="btn-pill btn-screenshot-export" onclick="exportCardScreenshot('multimodalResultCard', 'Multimodal Image Forensic Report')">
+                                📸 Download Report Screenshot
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- SECTION 4: SOCIAL MEDIA SCANNER (SNAPCHAT INCLUDED, TIKTOK REMOVED) -->
+        <!-- ============================================================== -->
+        <section id="social" class="content-section hidden">
+            <div class="section-title-bar">
+                <div>
+                    <h2>🔍 Social Media Forensics & Bot Analysis</h2>
+                    <p class="section-subtitle">Deep heuristic inspection for handle mimicry, synthetic personas, and phishing lures</p>
+                </div>
+            </div>
+
+            <div class="scanner-two-col">
+                <div class="panel-box">
+                    <form id="socialForm">
+                        <div class="form-group">
+                            <label for="socialBrand">Protected Brand / Executive Name *</label>
+                            <input type="text" id="socialBrand" placeholder="e.g. Apex Bank or Snapchat" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group flex-1">
+                                <label for="socialPlatform">Target Platform *</label>
+                                <select id="socialPlatform" required>
+                                    <option value="snapchat">Snapchat</option>
+                                    <option value="instagram">Instagram</option>
+                                    <option value="x">X (formerly Twitter)</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="telegram">Telegram</option>
+                                    <option value="linkedin">LinkedIn</option>
+                                    <option value="youtube">YouTube</option>
+                                    <option value="discord">Discord</option>
+                                </select>
+                            </div>
+                            <div class="form-group flex-1">
+                                <label for="socialAccount">Suspicious Username / Handle *</label>
+                                <input type="text" id="socialAccount" placeholder="e.g. snapchat_support_help_official" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="socialUrl">Profile URL</label>
+                            <input type="url" id="socialUrl" placeholder="https://snapchat.com/add/snapchat_support">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="socialOfficial">Legitimate Official Handle (Optional)</label>
+                            <input type="text" id="socialOfficial" placeholder="e.g. snapchat">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="socialBio">Profile Bio / Status Description (Optional)</label>
+                            <textarea id="socialBio" rows="2" placeholder="e.g. 'Official Support! DM for account recovery and verified streaks!'"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="socialScreenshotInput">📸 Attach Profile / DM Screenshot Evidence (Optional)</label>
+                            <input type="file" id="socialScreenshotInput" accept="image/*" class="form-file-input" onchange="previewEvidenceFile(this, 'socialFilePreview')">
+                            <div id="socialFilePreview" class="file-preview-name text-mono hidden"></div>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="btnSubmitSocial">
+                            <span class="btn-text">⚡ Run Deep Forensic Analysis</span>
+                            <span class="btn-spinner hidden"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="panel-box results-box" id="socialResultCard">
+                    <div class="placeholder-state" id="socialPlaceholder">
+                        <div class="placeholder-icon">🔎</div>
+                        <h3>Awaiting Target Data</h3>
+                        <p>Fill out profile parameters on the left or select the <b>Snapchat Impersonator</b> preset above.</p>
+                    </div>
+
+                    <div class="analysis-results-content hidden" id="socialResults">
+                        <div class="score-gauge-header">
+                            <div class="gauge-meter-wrapper">
+                                <svg class="gauge-svg" viewBox="0 0 120 120">
+                                    <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                                    <circle class="gauge-progress" id="socialGaugeArc" cx="60" cy="60" r="50"></circle>
+                                </svg>
+                                <div class="gauge-center-text">
+                                    <span class="gauge-number" id="socialScoreVal">0</span>
+                                    <span class="gauge-sub">/ 100</span>
+                                </div>
+                            </div>
+                            <div class="score-meta">
+                                <span class="badge-risk" id="socialRiskBadge">Minimal</span>
+                                <h3 id="socialResultTitle">Threat Assessment</h3>
+                                <p id="socialResultTarget" class="text-mono">@target</p>
+                            </div>
+                        </div>
+
+                        <div class="vector-bars-group">
+                            <h4>Forensic Vector Breakdown</h4>
+                            <div class="vector-bar-item">
+                                <div class="bar-labels">
+                                    <span>Domain Authenticity</span>
+                                    <span id="barValDomain">0%</span>
+                                </div>
+                                <div class="bar-track"><div class="bar-fill" id="barFillDomain"></div></div>
+                            </div>
+                            <div class="vector-bar-item">
+                                <div class="bar-labels">
+                                    <span>Handle Mimicry & Homoglyphs</span>
+                                    <span id="barValHandle">0%</span>
+                                </div>
+                                <div class="bar-track"><div class="bar-fill" id="barFillHandle"></div></div>
+                            </div>
+                            <div class="vector-bar-item">
+                                <div class="bar-labels">
+                                    <span>Phishing & Scam Lures</span>
+                                    <span id="barValPhish">0%</span>
+                                </div>
+                                <div class="bar-track"><div class="bar-fill" id="barFillPhish"></div></div>
+                            </div>
+                            <div class="vector-bar-item">
+                                <div class="bar-labels">
+                                    <span>Synthetic Bot Pattern</span>
+                                    <span id="barValBot">0%</span>
+                                </div>
+                                <div class="bar-track"><div class="bar-fill" id="barFillBot"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="indicators-section">
+                            <h4>Forensic Detection Indicators</h4>
+                            <ul class="indicators-list" id="socialIndicatorsList"></ul>
+                        </div>
+
+                        <!-- Bilingual Telugu Explanation -->
+                        <div class="bilingual-explanation-box">
+                            <div class="lang-tag">తెలుగు వివరణ (Telugu Guidance)</div>
+                            <p id="socialTeluguText" class="telugu-text">హెచ్చరిక...</p>
+                        </div>
+
+                        <div class="results-actions">
+                            <button class="btn-action-primary" id="btnSocialGenerateTakedown">
+                                ⚖️ Draft Instant Legal Takedown Notice
+                            </button>
+                            <button class="btn-pill btn-screenshot-export" onclick="exportCardScreenshot('socialResultCard', 'Social Media Threat Report')">
+                                📸 Download Report Screenshot
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- SECTION 5: MOBILE APP MONITORING -->
+        <!-- ============================================================== -->
+        <section id="app" class="content-section hidden">
+            <div class="section-title-bar">
+                <div>
+                    <h2>📱 Rogue Mobile App & Trojan Scanner</h2>
+                    <p class="section-subtitle">Audit unofficial APK releases, brand hijacking, and malicious accessibility permissions</p>
+                </div>
+            </div>
+
+            <div class="scanner-two-col">
+                <div class="panel-box">
+                    <form id="appForm">
+                        <div class="form-group">
+                            <label for="appBrand">Brand Protected *</label>
+                            <input type="text" id="appBrand" placeholder="e.g. Apex Bank" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group flex-1">
+                                <label for="appName">Suspicious Application Name *</label>
+                                <input type="text" id="appName" placeholder="e.g. Apex Bank Quick Loan MOD" required>
+                            </div>
+                            <div class="form-group flex-1">
+                                <label for="appStore">App Store / Host Source *</label>
+                                <select id="appStore" required>
+                                    <option value="Google Play">Google Play Store</option>
+                                    <option value="Apple App Store">Apple App Store</option>
+                                    <option value="APKPure">APKPure (Third-Party Repository)</option>
+                                    <option value="APKMirror">APKMirror (Third-Party Repository)</option>
+                                    <option value="Direct Download">Untrusted Direct APK Web Link</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group flex-1">
+                                <label for="appDeveloper">Listed Developer / Publisher</label>
+                                <input type="text" id="appDeveloper" placeholder="e.g. FastLoan Studio Ltd">
+                            </div>
+                            <div class="form-group flex-1">
+                                <label for="appEmail">Developer Contact Email</label>
+                                <input type="email" id="appEmail" placeholder="e.g. dev.loans2026@gmail.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="appPackage">Android Package Identifier (Optional)</label>
+                            <input type="text" id="appPackage" placeholder="e.g. com.apexbank.quickloan.mod">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Flagged High-Risk Permissions (Check all requested)</label>
+                            <div class="permissions-checkbox-grid">
+                                <label class="checkbox-pill">
+                                    <input type="checkbox" name="permissions" value="BIND_ACCESSIBILITY_SERVICE">
+                                    <span>Accessibility Abuse (Keylogger risk)</span>
+                                </label>
+                                <label class="checkbox-pill">
+                                    <input type="checkbox" name="permissions" value="RECEIVE_SMS">
+                                    <span>SMS Interception (2FA bypass)</span>
+                                </label>
+                                <label class="checkbox-pill">
+                                    <input type="checkbox" name="permissions" value="SYSTEM_ALERT_WINDOW">
+                                    <span>Screen Overlay (Fake login UI)</span>
+                                </label>
+                                <label class="checkbox-pill">
+                                    <input type="checkbox" name="permissions" value="REQUEST_INSTALL_PACKAGES">
+                                    <span>Dropper Payload (Installs APKs)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="appScreenshotInput">📸 Attach App Store / APK Screenshot Evidence (Optional)</label>
+                            <input type="file" id="appScreenshotInput" accept="image/*" class="form-file-input" onchange="previewEvidenceFile(this, 'appFilePreview')">
+                            <div id="appFilePreview" class="file-preview-name text-mono hidden"></div>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="btnSubmitApp">
+                            <span class="btn-text">⚡ Audit Application Security</span>
+                            <span class="btn-spinner hidden"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="panel-box results-box" id="appResultCard">
+                    <div class="placeholder-state" id="appPlaceholder">
+                        <div class="placeholder-icon">📱</div>
+                        <h3>Awaiting App Data</h3>
+                        <p>Enter mobile app parameters or trigger the <b>Cloned Bank APK</b> preset above.</p>
+                    </div>
+
+                    <div class="analysis-results-content hidden" id="appResults">
+                        <div class="score-gauge-header">
+                            <div class="gauge-meter-wrapper">
+                                <svg class="gauge-svg" viewBox="0 0 120 120">
+                                    <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                                    <circle class="gauge-progress" id="appGaugeArc" cx="60" cy="60" r="50"></circle>
+                                </svg>
+                                <div class="gauge-center-text">
+                                    <span class="gauge-number" id="appScoreVal">0</span>
+                                    <span class="gauge-sub">/ 100</span>
+                                </div>
+                            </div>
+                            <div class="score-meta">
+                                <span class="badge-risk" id="appRiskBadge">Minimal</span>
+                                <h3 id="appResultTitle">App Assessment</h3>
+                                <p id="appResultTarget" class="text-mono">Target App</p>
+                            </div>
+                        </div>
+
+                        <div class="indicators-section">
+                            <h4>Detected App Threat Vectors</h4>
+                            <ul class="indicators-list" id="appIndicatorsList"></ul>
+                        </div>
+
+                        <!-- Bilingual Telugu Explanation -->
+                        <div class="bilingual-explanation-box">
+                            <div class="lang-tag">తెలుగు వివరణ (Telugu Guidance)</div>
+                            <p id="appTeluguText" class="telugu-text">హెచ్చరిక...</p>
+                        </div>
+
+                        <div class="results-actions">
+                            <button class="btn-action-primary" id="btnAppGenerateTakedown">
+                                ⚖️ Draft App Store Takedown Notice
+                            </button>
+                            <button class="btn-pill btn-screenshot-export" onclick="exportCardScreenshot('appResultCard', 'Mobile App Threat Report')">
+                                📸 Download Report Screenshot
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- SECTION 6: TYPOSQUATTING & HOMOGLYPH SCANNER -->
+        <!-- ============================================================== -->
+        <section id="typosquat" class="content-section hidden">
+            <div class="section-title-bar">
+                <div>
+                    <h2>🌐 Unicode Homoglyph & Typosquatting Engine</h2>
+                    <p class="section-subtitle">Detect deceptive lookalike domains using Cyrillic confusable characters, omissions, and phishing affixes</p>
+                </div>
+            </div>
+
+            <div class="panel-box">
+                <form id="typosquatForm" class="inline-search-form">
+                    <div class="form-group flex-2">
+                        <label for="typosquatBrand">Target Domain / Brand Name *</label>
+                        <input type="text" id="typosquatBrand" placeholder="e.g. paypal.com or snapchat.com" required>
+                    </div>
+                    <div class="form-group flex-2">
+                        <label for="typosquatCandidates">Suspect Domains to Test (Optional, comma separated)</label>
+                        <input type="text" id="typosquatCandidates" placeholder="e.g. pаypal.com, snapchat-verify.xyz">
+                    </div>
+                    <div class="form-group flex-2">
+                        <label for="typosquatScreenshotInput">📸 Attach Phishing Page Screenshot (Optional)</label>
+                        <input type="file" id="typosquatScreenshotInput" accept="image/*" class="form-file-input" onchange="previewEvidenceFile(this, 'typoFilePreview')">
+                        <div id="typoFilePreview" class="file-preview-name text-mono hidden"></div>
+                    </div>
+                    <div class="form-group flex-1 form-btn-align">
+                        <button type="submit" class="btn-submit" id="btnSubmitTyposquat">
+                            <span>🔍 Detect Lookalikes</span>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="typosquat-table-wrapper" id="typosquatResultsContainer">
+                    <table class="threat-table">
+                        <thead>
+                            <tr>
+                                <th>Candidate Domain</th>
+                                <th>Attack Mechanism</th>
+                                <th>Visual Match</th>
+                                <th>Risk Score</th>
+                                <th>Severity</th>
+                                <th>Mitigation</th>
+                            </tr>
+                        </thead>
+                        <tbody id="typosquatTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    Enter a brand above or click the <b>Homoglyph Typosquat</b> preset to generate deceptive permutations.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Typosquatting Summary & Telugu Warning Box -->
+                <div class="typosquat-summary-panel hidden" id="typosquatSummaryPanel">
+                    <div class="bilingual-explanation-box">
+                        <div class="lang-tag">తెలుగు వివరణ (Telugu Guidance)</div>
+                        <p id="typosquatTeluguText" class="telugu-text">హెచ్చరిక: మీ బ్రాండ్‌ను పోలిన నకిలీ డొమైన్‌లు కనుగొనబడ్డాయి.</p>
+                    </div>
+                    <div class="results-actions mt-3">
+                        <button class="btn-pill btn-screenshot-export" onclick="exportCardScreenshot('typosquatResultsContainer', 'Homoglyph & Typosquatting Threat Report')">
+                            📸 Download Report Screenshot
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- SECTION 7: LIVE USER VOICE RECORDING & VOICE SCAM AUDITOR -->
+        <!-- ============================================================== -->
+        <section id="voice" class="content-section hidden">
+            <div class="section-title-bar">
+                <div>
+                    <h2>🎙️ Live Voice Scam Auditor & Audio Forensics</h2>
+                    <p class="section-subtitle">Real-time user microphone recording, speech transcription, and extortion/coercion detection (Digital Arrest, Fake Police/CBI, Bank OTP phishing)</p>
+                </div>
+                <div class="voice-presets-group">
+                    <span class="preset-label">Audio Scenarios:</span>
+                    <button class="preset-chip" onclick="loadVoiceScenario('digital_arrest')">🚨 Digital Arrest (CBI/Police)</button>
+                    <button class="preset-chip" onclick="loadVoiceScenario('bank_otp')">🏦 Bank Manager OTP Trap</button>
+                    <button class="preset-chip" onclick="loadVoiceScenario('fedex_drug')">📦 FedEx Drug Parcel Scam</button>
+                    <button class="preset-chip" onclick="loadVoiceScenario('safe_call')">✅ Safe Routine Call</button>
+                </div>
+            </div>
+
+            <div class="scanner-two-col">
+                <div class="panel-box">
+                    <!-- Audio Recording Console -->
+                    <div class="voice-recorder-console">
+                        <div class="recorder-header">
+                            <span class="recorder-title">Microphone Audio Console</span>
+                            <span class="recorder-timer" id="recordingTimer">⏱️ 00:00</span>
+                        </div>
+
+                        <!-- Waveform Canvas -->
+                        <div class="waveform-container">
+                            <canvas id="voiceWaveformCanvas" width="500" height="90"></canvas>
+                            <div id="recordingStatusPill" class="recording-status-pill hidden">🔴 RECORDING LIVE AUDIO...</div>
+                        </div>
+
+                        <!-- Controls -->
+                        <div class="recorder-controls">
+                            <button type="button" class="btn-record" id="btnStartVoiceRecord" onclick="toggleVoiceRecording()">
+                                <span id="btnRecordIcon">🎙️</span> <span id="btnRecordText">Start Voice Recording</span>
+                            </button>
+                            <button type="button" class="btn-secondary" id="btnPlayRecordedVoice" onclick="playRecordedAudio()" disabled>
+                                ▶️ Play Audio
+                            </button>
+                        </div>
+                        <audio id="recordedAudioElement" class="hidden"></audio>
+                    </div>
+
+                    <form id="voiceAuditForm" class="mt-4">
+                        <div class="form-group">
+                            <label for="voiceCallerId">Claimed Caller Name / Phone Number *</label>
+                            <input type="text" id="voiceCallerId" placeholder="e.g. Inspector Sharma / Mumbai Police (+919876543210)" required>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="flex-between">
+                                <label for="voiceTranscriptText">Transcribed Speech / Call Audio Text *</label>
+                                <span class="text-muted text-xs" id="sttStatus">Speech-to-text active</span>
+                            </div>
+                            <textarea id="voiceTranscriptText" rows="4" placeholder="Speak into the microphone or paste the call transcript here (e.g. 'You are under digital arrest. Stay on video call, arrest warrant is issued for money laundering...')" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="voiceScreenshotInput">📸 Attach Caller ID / WhatsApp Screenshot (Optional)</label>
+                            <input type="file" id="voiceScreenshotInput" accept="image/*" class="form-file-input" onchange="previewEvidenceFile(this, 'voiceFilePreview')">
+                            <div id="voiceFilePreview" class="file-preview-name text-mono hidden"></div>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="btnSubmitVoice">
+                            <span>⚡ Audit Voice Recording for Extortion & Coercion</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Voice Results Card -->
+                <div class="panel-box results-box" id="voiceResultCard">
+                    <div class="placeholder-state" id="voicePlaceholder">
+                        <div class="placeholder-icon">🎙️</div>
+                        <h3>Awaiting Voice Input</h3>
+                        <p>Click <b>Start Voice Recording</b> to record your microphone, or select a scenario like <b>Digital Arrest (CBI/Police)</b> above.</p>
+                    </div>
+
+                    <div class="analysis-results-content hidden" id="voiceResults">
+                        <div class="score-gauge-header">
+                            <div class="gauge-meter-wrapper">
+                                <svg class="gauge-svg" viewBox="0 0 120 120">
+                                    <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                                    <circle class="gauge-progress" id="voiceGaugeArc" cx="60" cy="60" r="50"></circle>
+                                </svg>
+                                <div class="gauge-center-text">
+                                    <span class="gauge-number" id="voiceScoreVal">0</span>
+                                    <span class="gauge-sub">/ 100</span>
+                                </div>
+                            </div>
+                            <div class="score-meta">
+                                <span class="badge-risk" id="voiceRiskBadge">High Risk</span>
+                                <h3 id="voiceResultTitle">Voice Call Assessment</h3>
+                                <p id="voiceResultTarget" class="text-mono">Caller ID</p>
+                            </div>
+                        </div>
+
+                        <div class="scam-archetype-box" id="voiceArchetypeBox">
+                            <span class="archetype-label">Detected Voice Archetype:</span>
+                            <b id="voiceArchetypeVal">🚨 Digital Arrest & Police Extortion Scam</b>
+                        </div>
+
+                        <div class="indicators-section">
+                            <h4>Identified Acoustic & Extortion Vectors</h4>
+                            <ul class="indicators-list" id="voiceVectorsList"></ul>
+                        </div>
+
+                        <div class="indicators-section">
+                            <h4>Psychological Coercion Tactics</h4>
+                            <ul class="indicators-list" id="voiceCoercionList"></ul>
+                        </div>
+
+                        <!-- Prominent Telugu Warning Box -->
+                        <div class="bilingual-explanation-box" id="voiceTeluguBox">
+                            <div class="lang-tag">తెలుగు హెచ్చరిక & మార్గదర్శకం (Telugu Warning & Guidance)</div>
+                            <p id="voiceTeluguText" class="telugu-text">హెచ్చరిక...</p>
+                        </div>
+
+                        <div class="results-actions">
+                            <button class="btn-action-primary" id="btnVoiceGenerateTakedown">
+                                ⚖️ Draft 1930 Cyber Crime Complaint Notice
+                            </button>
+                            <button class="btn-pill btn-screenshot-export" onclick="exportCardScreenshot('voiceResultCard', 'Voice Scam Forensic Dossier')">
+                                📸 Download Report Screenshot
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- SECTION 8: SCAM CONNECTION GRAPH (NETWORK VISUALIZATION) -->
+        <!-- ============================================================== -->
+        <section id="scamgraph" class="content-section hidden">
+            <div class="section-title-bar">
+                <div>
+                    <h2>🕸️ Interactive Scam Connection Graph</h2>
+                    <p class="section-subtitle">Visualizes syndicated infrastructure linking deceptive handles, rogue APKs, phishing domains, and scam UPI IDs</p>
+                </div>
+                <button class="btn-action-primary" onclick="generateRandomScamNetwork()">
+                    🔄 Regenerate Graph Topology
+                </button>
+            </div>
+
+            <div class="panel-box">
+                <div class="graph-canvas-container">
+                    <canvas id="scamNetworkCanvas" width="900" height="480"></canvas>
+                    <div class="graph-legend-box">
+                        <div class="g-leg-item"><span class="g-dot dot-red"></span> Primary Target / Syndicate Hub</div>
+                        <div class="g-leg-item"><span class="g-dot dot-orange"></span> Phishing Landing Domain</div>
+                        <div class="g-leg-item"><span class="g-dot dot-purple"></span> Cloned Rogue APK</div>
+                        <div class="g-leg-item"><span class="g-dot dot-cyan"></span> Fraudulent UPI / Hotline</div>
+                        <div class="g-leg-item"><span class="g-dot dot-blue"></span> Victim Reports</div>
+                    </div>
+                </div>
+                <div class="graph-details-strip" id="graphNodeDetails">
+                    <b>Node Inspector:</b> Hover or click any node on the graph to inspect forensic IP address, registrar, and correlation indicators.
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- SECTION 8: LIVE THREAT INTELLIGENCE FEED -->
+        <!-- ============================================================== -->
+        <section id="alerts" class="content-section hidden">
+            <div class="section-title-bar">
+                <div>
+                    <h2>🚨 Live Threat Intelligence Telemetry</h2>
+                    <p class="section-subtitle">Real-time incident queue with deep forensic dossiers and remediation tracking</p>
+                </div>
+                <div class="threat-feed-controls">
+                    <input type="text" id="filterThreatInput" placeholder="Filter by handle, brand, or indicator..." oninput="filterThreatFeed()">
+                    <select id="filterSeveritySelect" onchange="filterThreatFeed()">
+                        <option value="ALL">All Severities</option>
+                        <option value="Critical">Critical</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                        <option value="Minimal">Minimal</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="panel-box p-0">
+                <table class="threat-table" id="liveThreatTable">
+                    <thead>
+                        <tr>
+                            <th>Incident ID</th>
+                            <th>Target Asset</th>
+                            <th>Platform</th>
+                            <th>Brand</th>
+                            <th>Risk Score</th>
+                            <th>Severity</th>
+                            <th>Primary Indicator</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="liveThreatTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- SECTION 9: 1-CLICK AUTOMATED TAKEDOWN GENERATOR -->
+        <!-- ============================================================== -->
+        <section id="takedown" class="content-section hidden">
+            <div class="section-title-bar">
+                <div>
+                    <h2>⚖️ 1-Click Automated Legal Takedown Generator</h2>
+                    <p class="section-subtitle">Generates legally structured Cease-and-Desist and DMCA notices tailored for Trust & Safety enforcement</p>
+                </div>
+            </div>
+
+            <div class="scanner-two-col">
+                <div class="panel-box">
+                    <form id="takedownForm">
+                        <div class="form-group">
+                            <label for="takeBrand">Protected Organization / Brand *</label>
+                            <input type="text" id="takeBrand" placeholder="e.g. State Bank of India or Snapchat" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group flex-1">
+                                <label for="takePlatform">Target Platform / Host *</label>
+                                <select id="takePlatform" required>
+                                    <option value="Snapchat">Snapchat Trust & Safety</option>
+                                    <option value="Instagram">Instagram / Meta Legal</option>
+                                    <option value="X">X Safety Operations</option>
+                                    <option value="Google Play">Google Play Store Abuse</option>
+                                    <option value="Apple App Store">Apple App Store Legal</option>
+                                    <option value="Telegram">Telegram Abuse Team</option>
+                                    <option value="Domain Registrar">Domain Registrar / ICANN</option>
+                                </select>
+                            </div>
+                            <div class="form-group flex-1">
+                                <label for="takeAssetType">Asset Category *</label>
+                                <select id="takeAssetType" required>
+                                    <option value="Social Media Profile">Social Media Profile</option>
+                                    <option value="Mobile Application">Mobile Application</option>
+                                    <option value="Phishing Lookalike Domain">Phishing Lookalike Domain</option>
+                                    <option value="Brand Trademark Abuse">Brand Trademark Abuse</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="takeTarget">Infringing Asset Handle or URL *</label>
+                            <input type="text" id="takeTarget" placeholder="e.g. @snapchat_fake_support or https://..." required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="takeScore">Assigned Threat Score (0-100)</label>
+                            <input type="number" id="takeScore" min="0" max="100" value="88">
+                        </div>
+
+                        <button type="submit" class="btn-submit">
+                            <span>📄 Format Legal Takedown Notice</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="panel-box">
+                    <div class="takedown-output-header">
+                        <h3>Generated Legal Takedown Dispatch</h3>
+                        <div class="btn-group-sm">
+                            <button class="btn-pill" onclick="copyTakedownNotice()">📋 Copy Notice</button>
+                            <button class="btn-pill" onclick="downloadTakedownNotice()">💾 Download (.txt)</button>
+                        </div>
+                    </div>
+                    <textarea id="takedownOutput" class="code-editor-box" readonly placeholder="Your generated Cease-and-Desist and DMCA notice will appear here..."></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- SECTION 10: SECURITY KNOWLEDGE HUB (ENGLISH & TELUGU) -->
+        <!-- ============================================================== -->
+        <section id="hub" class="content-section hidden">
+            <div class="section-title-bar">
+                <div>
+                    <h2>💡 Security Knowledge Hub & Cyber Safety for Everyone</h2>
+                    <p class="section-subtitle">Demystifying digital risks in English and Telugu for students, families, and businesses</p>
+                </div>
+            </div>
+
+            <div class="hub-cards-grid">
+                <div class="hub-card">
+                    <div class="hub-card-icon">🧬</div>
+                    <h3>Brand DNA & Company Impersonation</h3>
+                    <p>
+                        Scammers create fake websites that mimic real banks like SBI or HDFC. They use similar logos and colors, but the URL is completely different (e.g. <code>sbi-verify-kyc.xyz</code> instead of <code>sbi.co.in</code>).
+                    </p>
+                    <div class="telugu-box">
+                        <b>తెలుగు వివరణ:</b> మోసగాళ్ళు నిజమైన బ్యాంకుల లోగోలను ఉపయోగించి నకిలీ వెబ్‌సైట్లను సృష్టిస్తారు. అధికారిక వెబ్‌సైట్ డొమైన్‌ను ఎల్లప్పుడూ తనిఖీ చేయండి.
+                    </div>
+                    <div class="hub-tag">Brand DNA Protection</div>
+                </div>
+
+                <div class="hub-card">
+                    <div class="hub-card-icon">📱</div>
+                    <h3>Why are Rogue App Permissions Dangerous?</h3>
+                    <p>
+                        Cloned apps request <code>BIND_ACCESSIBILITY_SERVICE</code> and <code>RECEIVE_SMS</code> to intercept 2FA OTPs and steal bank logins silently in the background.
+                    </p>
+                    <div class="telugu-box">
+                        <b>తెలుగు వివరణ:</b> నకిలీ యాప్‌లు మీ మొబైల్ SMS మరియు పాస్‌వర్డ్‌లను చదవడానికి హానికరమైన అనుమతులను అడుగుతాయి. బయటి సైట్ల నుండి APKలను ఇన్‌స్టాల్ చేయవద్దు.
+                    </div>
+                    <div class="hub-tag">Mobile Trojan Defense</div>
+                </div>
+
+                <div class="hub-card">
+                    <div class="hub-card-icon">🔤</div>
+                    <h3>What is a Homoglyph Attack?</h3>
+                    <p>
+                        Attackers substitute letters with identical-looking Cyrillic characters (e.g. Cyrillic 'а' in <code>pаypal.com</code>). They look identical to humans, but redirect to a hacker's server.
+                    </p>
+                    <div class="telugu-box">
+                        <b>తెలుగు వివరణ:</b> కంటికి ఒకేలా కనిపించే విదేశీ అక్షరాలను ఉపయోగించి నకిలీ లింకులు తయారు చేస్తారు.
+                    </div>
+                    <div class="hub-tag">Visual Identity Spoofing</div>
+                </div>
+
+                <div class="hub-card">
+                    <div class="hub-card-icon">🔔</div>
+                    <h3>Perimeter Alarm & Instant Remediation</h3>
+                    <p>
+                        AegisGuard triggers audible and visual alarms the instant high-risk assets are detected, immediately drafting pre-formatted legal DMCA notices.
+                    </p>
+                    <div class="telugu-box">
+                        <b>తెలుగు వివరణ:</b> అధిక ప్రమాదం ఉన్న మోసాలను గుర్తించిన వెంటనే సైరన్ అలారం మోగుతుంది మరియు లీగల్ రిపోర్ట్ స్వయంచాలకంగా తయారవుతుంది.
+                    </div>
+                    <div class="hub-tag">Autonomous Defense</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- POPUP MODAL FOR INCIDENT FORENSIC DOSSIER -->
+    <div class="modal-backdrop hidden" id="incidentModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modalIncidentId">Incident Dossier</h3>
+                    <span class="badge-risk" id="modalRiskBadge">High</span>
+                </div>
+                <button class="modal-close" onclick="closeIncidentModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBodyContent"></div>
+            <div class="modal-footer">
+                <button class="btn-action-primary" id="btnModalDispatchTakedown">Dispatch Takedown Notice</button>
+                <button class="btn-secondary" onclick="closeIncidentModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

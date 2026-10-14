@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AegisGuard | Next-Gen Digital Risk Protection Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="landing-body">
+    <!-- Ambient Cyber Glow Background -->
+    <div class="cyber-glow-orb orb-1"></div>
+    <div class="cyber-glow-orb orb-2"></div>
+    <div class="cyber-glow-orb orb-3"></div>
+
+    <div class="landing-wrapper">
+        <!-- Navigation Header -->
+        <header class="landing-nav">
+            <div class="brand-logo-group">
+                <span class="logo-symbol">🛡️</span>
+                <span class="brand-name">AegisGuard <span class="badge-pill">DRP 2.0</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">Capabilities</a>
+                <a href="#benchmarks">Threat Telemetry</a>
+                <a href="/dashboard" class="btn-nav-action">Launch Command Center →</a>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <main class="hero-container">
+            <div class="hero-badge">
+                <span class="pulse-dot"></span>
+                <span>Hackathon Edition • Autonomous Brand & Identity Defense</span>
+            </div>
+
+            <h1 class="hero-title">
+                Protect Digital Identities Across
+                <span class="gradient-text">Social, Apps & Lookalike Domains</span>
+            </h1>
+
+            <p class="hero-subtitle">
+                The next-generation Digital Risk Protection (DRP) suite. Detect synthetic bot personas,
+                rogue mobile APK clones, Unicode homoglyph attacks, and dispatch 1-click legal takedowns with explainable AI forensics.
+            </p>
+
+            <div class="hero-cta-group">
+                <a href="/dashboard" class="start-btn pulse-glow">
+                    <span>⚡ Enter Live Security Dashboard</span>
+                </a>
+                <a href="/dashboard#demo-bar" class="btn-secondary">
+                    <span>🎯 Try Interactive Demo Scenarios</span>
+                </a>
+            </div>
+
+            <!-- Real-Time Metrics Strip -->
+            <div class="telemetry-ticker-bar" id="benchmarks">
+                <div class="ticker-card">
+                    <span class="ticker-label">Total Monitored Assets</span>
+                    <span class="ticker-val" id="metricTotal">{{ stats.total_scans }}</span>
+                    <span class="ticker-sub">Real-time scan corpus</span>
+                </div>
+                <div class="ticker-card">
+                    <span class="ticker-label">Active Threats Flagged</span>
+                    <span class="ticker-val text-red" id="metricHigh">{{ stats.high_and_critical_risk }}</span>
+                    <span class="ticker-sub">High & Critical risks</span>
+                </div>
+                <div class="ticker-card">
+                    <span class="ticker-label">Impersonation Rate</span>
+                    <span class="ticker-val text-warning">{{ stats.impersonation_rate }}</span>
+                    <span class="ticker-sub">Flagged perimeter attacks</span>
+                </div>
+                <div class="ticker-card">
+                    <span class="ticker-label">Remediation Velocity</span>
+                    <span class="ticker-val text-emerald">1-Click</span>
+                    <span class="ticker-sub">Automated Legal Takedown</span>
+                </div>
+            </div>
+
+            <!-- Core Next-Gen Features Section -->
+            <section class="features-section" id="features">
+                <div class="section-heading">
+                    <span class="tag-title">FUTURE-READY ARCHITECTURE</span>
+                    <h2>Comprehensive Threat Surface Protection</h2>
+                    <p>Designed for organizations, digital creators, and future-generation online ecosystems.</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🧬</div>
+                        <h3>Brand DNA & Real Co. Fraud Matcher</h3>
+                        <p>Cross-references suspect digital assets against authentic enterprise registries (State Bank of India, PayPal, Microsoft, Apple, Snapchat) to flag cloned entities and domain deviations.</p>
+                        <div class="feature-chip">Enterprise DNA Registry</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📸</div>
+                        <h3>Logo Abuse & Screenshot Scanner</h3>
+                        <p>Scans uploaded screenshots and photos for unauthorized trademark logos, fraudulent UPI payment requests, and high-urgency fake KYC disconnection lures.</p>
+                        <div class="feature-chip">Visual Trademark Forensics</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🔔</div>
+                        <h3>Audible Threat Alarm & Visual Siren</h3>
+                        <p>Instantly triggers an authentic synthesized cyber alarm and flashing warning beacon whenever high-risk impersonation or rogue APKs are detected.</p>
+                        <div class="feature-chip">Real-Time Threat Siren</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h3>Social Media & Snapchat Forensics</h3>
+                        <p>Evaluates profile handles, bio lures, domain authenticity, and automated bot entropy anomalies across Snapchat, Instagram, X, Facebook, and Telegram.</p>
+                        <div class="feature-chip">Snapchat & Multi-Platform</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🕸️</div>
+                        <h3>Interactive Scam Connection Graph</h3>
+                        <p>Visualizes syndicated threat networks linking suspect handles, rogue APKs, phishing domains, and fraudulent UPI hotlines with victim telemetry.</p>
+                        <div class="feature-chip">Topology Visualizer</div>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h3>Bilingual Cyber Safety (English & తెలుగు)</h3>
+                        <p>Demystifies cybersecurity with simple explanations and safe next steps in both English and Telugu for students, families, and everyday users.</p>
+                        <div class="feature-chip">Telugu & English Guidance</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="landing-footer">
+            <p>AegisGuard Digital Risk Protection • Open Hackathon Defense Project • Built for Future Generations</p>
+        </footer>
+    </div>
+</body>
+</html>
